@@ -1,4 +1,11 @@
+const val MINUTE = 60
+const val HOUR = 60 * MINUTE
+const val DAY = 24 * HOUR
+const val TWO_DAYS = 2 * DAY
+const val THREE_DAYS = 3 * DAY
+
 fun main() {
+    agoToText(1)
     agoToText((0..3600).random())
     agoToText((3601..86400).random())
     agoToText(24 * 60 * 60 + 1)
@@ -6,47 +13,37 @@ fun main() {
     agoToText(24 * 60 * 60 * 3 + 1)
 }
 
-fun agoToText(second: Int) {
-    when (second) {
-        in 0..60 -> println("только что")
-        in 61..60 * 60 -> convertStrForMinute(convertToMinute(second))
-        in 60 * 60 + 1..24 * 60 * 60 -> convertStrForClock(convertToClock(second))
-        in 24 * 60 * 60 + 1..24 * 60 * 60 * 2 -> println("сегодня")
-        in 24 * 60 * 60 * 2 + 1..24 * 60 * 60 * 3 -> println("вчера")
-        else -> println("давно")
+fun agoToText(seconds: Int) {
+    when {
+        seconds > THREE_DAYS -> println("давно")
+        seconds > TWO_DAYS -> println("вчера")
+        seconds > DAY -> println("сегодня")
+        seconds > HOUR -> println(timeToText(convertToHour(seconds), false))
+        seconds > MINUTE -> println(timeToText(convertToMinute(seconds), true))
+        else -> println("только что")
     }
 }
 
-fun convertStrForMinute(minute: Int) {
-    if (minute in 11..20) {
-        println("$minute минут назад")
+fun timeToText(time: Int, type: Boolean): String {
+    /* Параметр type подразумевает выбор единиц времени
+     * Для минут передаём true
+     * Для часов передаём false
+     */
+    return if (time % 100 in 11..20) {
+        if (type) "$time минут назад" else "$time часов назад"
     } else {
-        when (minute%10) {
-            0 -> println("$minute минут назад")
-            1 -> println("$minute минуту назад")
-            in 2..4 -> println("$minute минуты назад")
-            in 5..9 -> println("$minute минут назад")
+        when (time % 10) {
+            1 -> if (type) "$time минуту назад" else "$time час назад"
+            in 2..4 -> if (type) "$time минуты назад" else "$time часа назад"
+            else -> if (type) "$time минут назад" else "$time часов назад"
         }
     }
 }
 
-fun convertStrForClock(clock: Int) {
-    if (clock in 11..20) {
-        println("$clock часов назад")
-    } else {
-        when (clock%10) {
-            0 -> println("$clock часов назад")
-            1 -> println("$clock час назад")
-            in 2..4 -> println("$clock часа назад")
-            in 5..9 -> println("$clock часов назад")
-        }
-    }
+fun convertToMinute(seconds: Int): Int {
+    return seconds / 60
 }
 
-fun convertToMinute(second: Int): Int {
-    return (second/60)
-}
-
-fun convertToClock(second: Int): Int {
-    return (second/3600)
+fun convertToHour(seconds: Int): Int {
+    return seconds / 3600
 }
